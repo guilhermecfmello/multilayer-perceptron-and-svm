@@ -11,20 +11,30 @@ class SVM(machine.machine):
     def __init__(self, dataName):
         self.dataPath = DATA_FOLDER + dataName
     
+    def __vectorToScalar(self, y_some):
+        newY = np.array([])
+        for y in y_some:
+            newY = np.append(newY, np.where(y == 1))
+        return newY
+            
+    def __scalarToVector(self, y_some):
+        newY = []
+        for y in y_some:
+            yAux = np.zeros(10,dtype=float)
+            yAux[int(y)] = 1
+            newY.append(yAux)
+        return newY
+
     def rbf_training(self):
         print("Runing SVM RBF training...")
         x_train, y_train = super().getDatasetTraining(self.dataPath)
-        for c in [0.1, 1, 10]:
-            for gamma in [0.1, 1, 10]:
-                s = svm.SVC(C=c, kernel='rbf', gamma=gamma)
-                s.fit(x_train, y_train)
-                dump(s, 'svm_rbf_'+c+'_'+gamma+'.joblib')
-                # pickle.dumps(s)
-        # print('Saving model')
-
-                # predicted = rbf_svm.predict(data_test[0])
-                # print("SETTINGS:")
-                # print("- C param: ", c)
-                # print("- gamma param: ", gamma)
-                # gen_metrics(gen_confusion_matrix(n_class, predicted, np.array(data_test[1])))
+        c = 0.1
+        gamma = 0.1
+        s = svm.SVC(C=c, kernel='linear', gamma=gamma)
+        y_train2 = self.__vectorToScalar(y_train)
+        s.fit(x_train, y_train2)
+        x_test, y_test = super().getDatasetTest(self.dataPath)
+        y_predict = s.predict(x_test)
+        y_predict = self.__scalarToVector(y_predict)
+        
         
